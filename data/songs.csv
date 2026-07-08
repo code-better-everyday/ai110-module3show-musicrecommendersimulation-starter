@@ -9,3 +9,13 @@ id,title,artist,genre,mood,energy,tempo_bpm,valence,danceability,acousticness
 8,Night Drive Loop,Neon Echo,synthwave,moody,0.75,110,0.49,0.73,0.22
 9,Focus Flow,LoRoom,lofi,focused,0.40,80,0.59,0.60,0.78
 10,Rooftop Lights,Indigo Parade,indie pop,happy,0.76,124,0.81,0.82,0.35
+11,Golden Hour,Kali Uchis,rnb,romantic,0.55,95,0.82,0.72,0.41
+12,Rainy Window,Acoustic Soul,folk,sad,0.22,68,0.30,0.38,0.94
+13,Bass Drop City,DVBBS,edm,euphoric,0.97,140,0.88,0.92,0.03
+14,Mountain Echo,Pine Ridge,country,relaxed,0.40,88,0.70,0.55,0.80
+15,Void Protocol,NullSet,metal,angry,0.95,168,0.20,0.50,0.05
+16,Moonlit Sonata,Clara Voss,classical,dreamy,0.18,58,0.75,0.25,0.98
+17,Street Cipher,Lox Chatterbox,hiphop,focused,0.72,95,0.60,0.85,0.10
+18,Neon Jungle,Pulse Theory,electronic,intense,0.88,128,0.65,0.90,0.04
+19,Sunday Porch,Delta Bloom,folk,happy,0.35,76,0.85,0.48,0.90
+20,Velvet Underground,Jazz Noir,jazz,moody,0.45,85,0.42,0.58,0.72
