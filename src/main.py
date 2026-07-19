@@ -15,6 +15,66 @@ You will implement the functions in recommender.py:
 from src.recommender import load_songs, recommend_songs
 
 
+# Phase 6 edit: Challenge 4 — ASCII table helper for Score Breakdown display.
+# Replaces the inline printing loop in main() so the output is a proper columnar
+# table rather than loose indented lines. Uses fixed-width f-string formatting only
+# (no tabulate import needed) to satisfy the challenge's "simple ASCII formatting"
+# requirement.
+def format_score_table(rank, song, score, reasons, MAX_SCORE, user_prefs):
+    """Print one recommendation with an ASCII table for the Score Breakdown."""
+    normalized = (score / MAX_SCORE) * 10
+
+    print(f"\n  #{rank}  {song['title']}  -  {song['artist']}  "
+          f"[ Match: {normalized:.1f} / 10 ]")
+
+    genre_note = "(matches your preference)" if song["genre"] == user_prefs["genre"] \
+                 else f"(your preference: {user_prefs['genre']})"
+    mood_note  = "(matches your preference)" if song["mood"] == user_prefs["mood"] \
+                 else f"(your preference: {user_prefs['mood']})"
+
+    print(f"       Genre   : {song['genre'].capitalize():<12} {genre_note}")
+    print(f"       Mood    : {song['mood'].capitalize():<12} {mood_note}")
+    print(f"       Energy  : {song['energy']} "
+          f"({'high' if song['energy'] >= 0.7 else 'low' if song['energy'] <= 0.4 else 'medium'})")
+
+    W1, W2, W3 = 22, 9, 9
+    border = f"       +{'-' * (W1 + 2)}+{'-' * (W2 + 2)}+{'-' * (W3 + 2)}+"
+    print(f"\n       Score Breakdown:")
+    print(border)
+    print(f"       | {'Rule':<{W1}} | {'Raw pts':>{W2}} | {'Score/10':>{W3}} |")
+    print(border)
+    for reason in reasons:
+        label    = reason.split(" (+")[0].capitalize()
+        raw_pts  = float(reason.split("(+")[1].rstrip(")"))
+        norm_pts = (raw_pts / MAX_SCORE) * 10
+        print(f"       | {label:<{W1}} | {f'+{raw_pts:.2f}':>{W2}} | {f'{norm_pts:.1f}/10':>{W3}} |")
+    print(border)
+    total_raw = f"{score:.2f}/{MAX_SCORE}"
+    total_nrm = f"{normalized:.1f}/10"
+    print(f"       | {'TOTAL':<{W1}} | {total_raw:>{W2}} | {total_nrm:>{W3}} |")
+    print(border)
+
+
+# Phase 6 edit: Challenge 3 — Diversity Penalty.
+# Prevents the same artist from appearing more than once in the top-5 results.
+# Runs as a post-ranking step after recommend_songs() so it never touches
+# score_song() weights. Songs from a repeated artist are moved to a backfill list
+# and only appear if we run out of unique-artist candidates.
+def apply_diversity_filter(ranked_songs):
+    """Re-rank to remove duplicate artists; unique-artist songs fill the top slots."""
+    seen_artists = set()
+    diverse = []
+    backfill = []
+    for entry in ranked_songs:
+        artist = entry[0]["artist"]
+        if artist not in seen_artists:
+            seen_artists.add(artist)
+            diverse.append(entry)
+        else:
+            backfill.append(entry)
+    return diverse + backfill
+
+
 def main() -> None:
     songs = load_songs("data/songs.csv")
 
@@ -88,7 +148,10 @@ def main() -> None:
         print(f"\n  PROFILE {profile_num} of {len(profiles)}: {profile_name}")
         print(f"  {DASH}")
 
-        recommendations = recommend_songs(user_prefs, songs, k=5)
+        # Phase 6 edit: Challenge 3 — fetch k=10 candidates so the diversity filter
+        # has enough unique-artist options after dropping duplicates. Slice to 5 after.
+        recommendations = recommend_songs(user_prefs, songs, k=10)
+        recommendations = apply_diversity_filter(recommendations)[:5]
 
         # Verbose user profile block - one preference per line for clarity
         print("\n  YOUR TASTE PROFILE")
@@ -102,43 +165,11 @@ def main() -> None:
         print(f"  TOP {len(recommendations)} RECOMMENDATIONS")
         print(f"  {DASH}")
 
+        # Phase 6 edit: Challenge 4 — replaced inline Score Breakdown loop with
+        # format_score_table(), which displays the same data in a clean ASCII table.
         for rank, rec in enumerate(recommendations, start=1):
-            # Each rec is (song_dict, raw_score, reasons_list) from recommend_songs()
             song, score, reasons = rec
-
-            # Normalize raw score (0-4.5) to a 0-10 scale for readability
-            normalized = (score / MAX_SCORE) * 10
-
-            # Score transparency fix: title line shows the normalized total first
-            print(f"\n  #{rank}  {song['title']}  -  {song['artist']}  "
-                  f"[ Match: {normalized:.1f} / 10 ]")
-
-            # Genre and Mood lines show whether the song matched the user's preference
-            # so the reader immediately sees which attributes contributed before looking
-            # at the breakdown numbers below.
-            genre_note = "(matches your preference)" if song["genre"] == user_prefs["genre"] \
-                         else f"(your preference: {user_prefs['genre']})"
-            mood_note  = "(matches your preference)" if song["mood"] == user_prefs["mood"] \
-                         else f"(your preference: {user_prefs['mood']})"
-
-            print(f"       Genre   : {song['genre'].capitalize():<12} {genre_note}")
-            print(f"       Mood    : {song['mood'].capitalize():<12} {mood_note}")
-            print(f"       Energy  : {song['energy']} "
-                  f"({'high' if song['energy'] >= 0.7 else 'low' if song['energy'] <= 0.4 else 'medium'})")
-
-            # Score Breakdown block — each component shown with raw points AND its
-            # normalized contribution so the sub-scores visibly add up to the Match total.
-            # Parsing: every reason string ends with "(+N.NN)" so we split on "(+" and
-            # strip the trailing ")" to extract the raw float reliably.
-            print(f"\n       Score Breakdown:")
-            for reason in reasons:
-                label   = reason.split(" (+")[0].capitalize()
-                raw_pts = float(reason.split("(+")[1].rstrip(")"))
-                norm_pts = (raw_pts / MAX_SCORE) * 10
-                print(f"         {label:<22} +{raw_pts:.2f} pts  ->  {norm_pts:.1f} / 10")
-
-            print(f"         {'':->40}")
-            print(f"         {'Total':<22}  {score:.2f} / {MAX_SCORE}  =  {normalized:.1f} / 10")
+            format_score_table(rank, song, score, reasons, MAX_SCORE, user_prefs)
 
         print(f"\n{SEP}\n")
 

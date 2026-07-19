@@ -82,6 +82,10 @@ The same weight shift was also analyzed for the adversarial profile. The result 
 
 **Mood weight experiments (Experiments A and B):** To try to resolve the adversarial profile edge case, two additional weight configurations were tested — genre=1.5/mood=1.5 and genre=1.0/mood=2.0 — across all four profiles simultaneously (MAX_SCORE held at 4.5). Neither fixed the problem. Experiment A (genre=1.5, mood=1.5) narrowed the gap between Bass Drop City and Rainy Window (5.5 vs 5.0) but kept the folk ballad at #2. Experiment B (genre=1.0, mood=2.0) flipped the adversarial result entirely, making Rainy Window #1 at 6.2/10 — worse, not better. For the other three profiles, Experiment A produced the most balanced behavior: Rooftop Lights (indie pop/happy) moved above Gym Hero (pop/wrong mood) for the pop profile, rewarding correct mood match over genre label. The conclusion from all weight experiments is that the adversarial edge case cannot be resolved by tuning — it requires input validation to detect contradictory preferences before scoring begins.
 
+**Stretch feature — Diversity Penalty (Challenge 3):** A post-ranking `apply_diversity_filter()` step was implemented in `main.py` to prevent the same artist from appearing more than once in the top-5 results. The filter runs after `recommend_songs()` returns k=10 candidates: it keeps the highest-ranked song for each artist and moves duplicate-artist entries to a backfill pool, slicing the final output to k=5. For the Chill Lofi Acoustic profile, this caused Focus Flow (LoRoom) — previously #3 — to be replaced by Spacewalk Thoughts (Orbit Bloom), since Midnight Coding (also LoRoom) already occupied #2. Scores and ranking order among unique-artist songs are unchanged.
+
+**Stretch feature — ASCII Score Breakdown table (Challenge 4):** The terminal output was upgraded from indented text lines to a formatted ASCII table with column headers (Rule | Raw pts | Score/10), one row per scoring rule, and a TOTAL footer row. The underlying data is identical; only the visual layout changed. Implementation uses Python f-string fixed-width formatting with no additional library dependencies.
+
 ---
 
 ## 8. Future Work
@@ -90,7 +94,7 @@ The most impactful single improvement would be expanding the catalog substantial
 
 The `UserProfile` dataclass could be extended with `target_tempo_bpm` and `target_valence` preference fields, and the corresponding scoring rules added to `score_song()`. Both tempo and valence are already in the CSV and would let the system distinguish between "relaxed but upbeat" versus "relaxed and melancholic" — a distinction mood alone cannot capture.
 
-A diversity penalty would prevent the same artist from appearing multiple times in the top-k results. Currently there is no such constraint, and profiles that match a well-represented genre can end up with the same artist (Neon Echo) at multiple positions — which would feel repetitive in a real product.
+A basic artist-level diversity filter was implemented in Phase 6 (`apply_diversity_filter()` in `main.py`). It prevents the same artist from appearing more than once in the top-5 results. A more complete version would also apply a genre-level diversity constraint — preventing the same genre from dominating all top-5 slots for users whose catalog has heavy genre representation — and would expose a configurable `max_per_artist` parameter rather than hard-coding 1.
 
 Connecting the system to a collaborative filtering layer would let it use listening patterns from other users to surface songs that similar-taste users enjoyed, even if they fall outside the strict genre/mood boundaries of the current profile. The two approaches (content-based and collaborative) can be blended — content-based for new users with no history, collaborative filtering once enough behavioral data is available.
 

@@ -643,6 +643,51 @@ Experiment A narrows the gap — Rainy Window climbs from 3.9 to 5.0 — but the
 
 ---
 
+## Stretch Features
+
+Two optional challenge features were implemented beyond the core Phase 1-5 requirements.
+
+### Challenge 4: Visual Summary Table (ASCII Score Breakdown)
+
+The original Score Breakdown used indented lines of plain text. This was replaced with a structured ASCII table that displays the same information — rule name, raw points, normalized score — in aligned columns with a border row and a TOTAL row at the bottom. The change makes the "sub-scores add up to the Match total" relationship immediately verifiable in one glance, without mentally tracking indentation.
+
+**Implementation:** A `format_score_table()` helper was added to `src/main.py`. It uses Python's built-in f-string fixed-width formatting (`:<22`, `:>9`) rather than the `tabulate` library, keeping the dependency list unchanged.
+
+Sample output:
+
+```
+  #1  Library Rain  -  Paper Lanterns  [ Match: 10.0 / 10 ]
+       Genre   : Lofi         (matches your preference)
+       Mood    : Chill        (matches your preference)
+       Energy  : 0.35 (low)
+
+       Score Breakdown:
+       +------------------------+-----------+-----------+
+       | Rule                   |   Raw pts |  Score/10 |
+       +------------------------+-----------+-----------+
+       | Genre match            |     +2.00 |    4.4/10 |
+       | Mood match             |     +1.00 |    2.2/10 |
+       | Energy proximity       |     +1.00 |    2.2/10 |
+       | Acoustic bonus         |     +0.50 |    1.1/10 |
+       +------------------------+-----------+-----------+
+       | TOTAL                  |  4.50/4.5 |   10.0/10 |
+       +------------------------+-----------+-----------+
+```
+
+---
+
+### Challenge 3: Diversity Penalty
+
+The core recommender has no constraint on how many songs from the same artist can appear in the top-k results. In testing, the Chill Lofi Acoustic profile returned two songs from the same artist (LoRoom) in positions #2 and #3, which would feel repetitive in a real product. The diversity filter prevents this.
+
+**Implementation:** An `apply_diversity_filter()` function was added to `src/main.py`. It runs as a post-ranking re-sort step after `recommend_songs()` returns the full scored list. It keeps each artist's highest-ranked song in a `diverse` bucket and moves any duplicate-artist songs to a `backfill` bucket. The final top-5 is built from `diverse` first, with `backfill` filling any remaining slots. To ensure 5 results are always available after filtering, `recommend_songs()` is called with k=10 before slicing to k=5.
+
+**AI prompt used for this feature:** *"Add a diversity filter that prevents the same artist from appearing more than once in the top-5 recommendations — if an artist is already in the list, skip additional songs by them and fill the slot with the next unique-artist song from the ranked list."*
+
+**Observed effect:** For the Chill Lofi Acoustic profile, Focus Flow (LoRoom) was the pre-filter #3, but since Midnight Coding (also LoRoom) was already in the #2 slot, the filter replaced Focus Flow with Spacewalk Thoughts (Orbit Bloom) — a different artist with a lower score but better variety. Library Rain (#1) and Midnight Coding (#2) were unaffected since they were already the first representatives of their artists.
+
+---
+
 ## Limitations and Risks
 
 MusicMoodMapper 1.0 has several important limitations that any real deployment would need to address:
