@@ -2,15 +2,15 @@
 
 ## 1. Model Name
 
-**VibeFinder 1.0**
+**MusicMoodMapper 1.0**
 
-A content-based music recommendation engine built for the CodePath AI110 Module 3 classroom simulation. "VibeFinder" reflects the system's core goal: matching a song's energy, mood, and genre signature to a listener's stated preferences, rather than relying on what other people listened to.
+A content-based music recommendation engine built for the CodePath AI110 Module 3 classroom simulation. "MusicMoodMapper" reflects the system's two-step process: it maps a listener's stated mood, genre, and energy preferences onto a catalog of songs and surfaces the closest matches, making the scoring math fully visible in the output.
 
 ---
 
 ## 2. Intended Use
 
-VibeFinder 1.0 is designed for classroom exploration of how rule-based recommendation systems work. It takes a single user's taste profile (their favorite genre, mood, target energy level, and acoustic preference) and ranks a catalog of 20 songs from best match to worst, returning the top 5 with a full Score Breakdown explaining exactly why each song was recommended.
+MusicMoodMapper 1.0 is designed for classroom exploration of how rule-based recommendation systems work. It takes a single user's taste profile (their favorite genre, mood, target energy level, and acoustic preference) and ranks a catalog of 20 songs from best match to worst, returning the top 5 with a full Score Breakdown explaining exactly why each song was recommended.
 
 The system assumes that the user can accurately state their preferences up front — it does not learn from listening history, skips, or repeated plays. It is not designed for production use or real user data. Its value is educational: by making every scoring decision visible and traceable, it lets students see exactly how a simple recommendation algorithm turns input data into a ranked list.
 
@@ -18,7 +18,7 @@ The system assumes that the user can accurately state their preferences up front
 
 ## 3. How the Model Works
 
-VibeFinder compares every song in the catalog to a user's taste profile across four dimensions. Each dimension contributes a number of points, and the song's total point score determines its rank.
+MusicMoodMapper compares every song in the catalog to a user's taste profile across four dimensions. Each dimension contributes a number of points, and the song's total point score determines its rank.
 
 First, if the song's genre matches the user's preferred genre (for example, both are "pop"), the song earns 2 points. Genre is the heaviest factor because musical genre is the strongest signal of whether a listener will enjoy a track — a jazz fan and a metal fan will rarely agree on the same song even if both feel "happy" or "high energy."
 
@@ -34,7 +34,7 @@ The maximum possible score is 4.5 points. All scores are also shown on a 0-to-10
 
 ## 4. Data
 
-The catalog contains 20 songs stored in a CSV file (`data/songs.csv`). Each song has the following attributes: a unique ID, title, artist, genre, mood, energy level, tempo (BPM), valence, danceability, and acousticness. Of these attributes, VibeFinder 1.0 uses genre, mood, energy, and acousticness for scoring. The remaining fields (tempo, valence, danceability) are present in the data but are not yet connected to any user preference — they are available for future improvement.
+The catalog contains 20 songs stored in a CSV file (`data/songs.csv`). Each song has the following attributes: a unique ID, title, artist, genre, mood, energy level, tempo (BPM), valence, danceability, and acousticness. Of these attributes, MusicMoodMapper 1.0 uses genre, mood, energy, and acousticness for scoring. The remaining fields (tempo, valence, danceability) are present in the data but are not yet connected to any user preference — they are available for future improvement.
 
 The catalog covers 12 genres: pop, lofi, rock, ambient, jazz, indie pop, synthwave, rnb, folk, edm, country, metal, classical, hiphop, and electronic. It covers 9 moods: happy, chill, intense, relaxed, moody, focused, romantic, sad, euphoric, angry, and dreamy. The original starter catalog had 10 songs; 10 additional songs were added manually during Phase 2 to broaden genre and mood coverage.
 
@@ -44,7 +44,7 @@ Important gaps in the dataset include: no lyrics or language information, no rel
 
 ## 5. Strengths
 
-VibeFinder works best when the user has clear, single-genre preferences. When a user wants "lofi/chill/low energy/acoustic," the system correctly surfaces all three lofi songs before any other genre, with Library Rain achieving a perfect 10.0/10 score because every single preference matched: genre, mood, exact energy target, and acoustic bonus all fired at once. This kind of end-to-end transparency — where the math is fully traceable in the Score Breakdown — is one of the system's strongest design features. A user can look at the output and explain exactly why every song ranked where it did, which most production recommenders cannot offer.
+MusicMoodMapper works best when the user has clear, single-genre preferences. When a user wants "lofi/chill/low energy/acoustic," the system correctly surfaces all three lofi songs before any other genre, with Library Rain achieving a perfect 10.0/10 score because every single preference matched: genre, mood, exact energy target, and acoustic bonus all fired at once. This kind of end-to-end transparency — where the math is fully traceable in the Score Breakdown — is one of the system's strongest design features. A user can look at the output and explain exactly why every song ranked where it did, which most production recommenders cannot offer.
 
 The energy proximity formula is also a genuine strength over a simpler high/low energy binary. By using `1.0 - abs(gap)`, the system rewards nearness in either direction — a user who wants medium energy 0.5 will score a song at 0.52 almost as high as one at exactly 0.5, rather than arbitrarily penalizing it for being "too high." This is closer to how humans actually experience energy levels than a strict cutoff would be.
 
@@ -98,6 +98,6 @@ Connecting the system to a collaborative filtering layer would let it use listen
 
 ## 9. Personal Reflection
 
-Building VibeFinder 1.0 made the invisible math behind everyday apps suddenly very visible. Every time Spotify or YouTube Music recommends something, there is a scoring function running somewhere that assigns weights to features and ranks results by total score. What this project showed is how much those weights matter: moving genre from 2.0 to 1.0 changed the ranking order and surfaced songs that were genuinely better vibes but the "wrong" label. That is not just an academic observation — it is a live example of how a design decision made by an engineer becomes a bias experienced by every user of the product.
+Building MusicMoodMapper 1.0 made the invisible math behind everyday apps suddenly very visible. Every time Spotify or YouTube Music recommends something, there is a scoring function running somewhere that assigns weights to features and ranks results by total score. What this project showed is how much those weights matter: moving genre from 2.0 to 1.0 changed the ranking order and surfaced songs that were genuinely better vibes but the "wrong" label. That is not just an academic observation — it is a live example of how a design decision made by an engineer becomes a bias experienced by every user of the product.
 
-The adversarial profile result was the most surprising moment of the evaluation. I expected the system to break or return garbage. Instead, it returned a logically valid but musically absurd answer: a folk ballad for someone who asked for high-energy EDM, justified by two real scoring rules (mood match and acoustic bonus). That is what makes algorithmic bias subtle and hard to catch — the system is not wrong by its own rules. It is only wrong by human standards that the rules do not capture. Systems that cannot explain their outputs at all are harder to audit than this one, and yet VibeFinder with full Score Breakdown transparency still produced an outcome that would feel unfair or confusing to a real user. That gap between "rule-correct" and "human-sensible" is, I think, one of the most important things to understand about AI-powered recommendation systems.
+The adversarial profile result was the most surprising moment of the evaluation. I expected the system to break or return garbage. Instead, it returned a logically valid but musically absurd answer: a folk ballad for someone who asked for high-energy EDM, justified by two real scoring rules (mood match and acoustic bonus). That is what makes algorithmic bias subtle and hard to catch — the system is not wrong by its own rules. It is only wrong by human standards that the rules do not capture. Systems that cannot explain their outputs at all are harder to audit than this one, and yet MusicMoodMapper with full Score Breakdown transparency still produced an outcome that would feel unfair or confusing to a real user. That gap between "rule-correct" and "human-sensible" is, I think, one of the most important things to understand about AI-powered recommendation systems.

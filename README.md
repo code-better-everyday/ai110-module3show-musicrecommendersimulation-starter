@@ -645,11 +645,11 @@ Experiment A narrows the gap — Rainy Window climbs from 3.9 to 5.0 — but the
 
 ## Limitations and Risks
 
-VibeFinder 1.0 has several important limitations that any real deployment would need to address:
+MusicMoodMapper 1.0 has several important limitations that any real deployment would need to address:
 
 **It only works on a small catalog.** With just 20 songs and 1-3 per genre, users will see the same top results across many different profiles. Any "pop" user will always see Sunrise City and Gym Hero because those are the only pop songs. The system cannot demonstrate real diversity until the catalog grows substantially.
 
-**It does not understand lyrics, language, or cultural context.** Two songs can share the same genre, mood, and energy but feel completely different because of their subject matter, language, or cultural origin. VibeFinder has no way to capture this. A user who wants "Spanish-language reggaeton" and a user who wants "English pop-punk" would receive identical treatment if both say genre="pop" and energy=0.8.
+**It does not understand lyrics, language, or cultural context.** Two songs can share the same genre, mood, and energy but feel completely different because of their subject matter, language, or cultural origin. MusicMoodMapper has no way to capture this. A user who wants "Spanish-language reggaeton" and a user who wants "English pop-punk" would receive identical treatment if both say genre="pop" and energy=0.8.
 
 **It overweights genre as a categorical label.** "Indie pop" and "pop" are scored as completely different genres — a binary miss — even though a fan of one is likely to enjoy the other. Real musical similarity is a spectrum, not a set of identical-or-totally-different buckets.
 
@@ -665,7 +665,7 @@ Read the full analysis in the [model card](model_card.md).
 
 Building this recommender revealed how much the invisible math of a scoring function shapes what users see. The weights — genre=2.0, mood=1.0, energy max=1.0 — are not just technical parameters. They encode a belief that genre is twice as important as mood and twice as important as energy match. That belief became a bias when the weight-shift experiment showed that Rooftop Lights (indie pop, happy, near-perfect energy) was being ranked below Gym Hero (pop, wrong mood, further energy) purely because the genre label matched. The song a user would actually enjoy more was buried by a design decision made before anyone ran a single profile.
 
-The adversarial profile experiment was even more surprising. Giving the system contradictory preferences — "I want high-energy EDM, I feel sad, and I like acoustic music" — did not produce an error. It produced a folk ballad at #2. The algorithm followed its own rules perfectly and still delivered a result that would make no sense to a real listener. That gap between "rule-correct" and "human-sensible" is exactly where most AI recommendation systems fail quietly, without any error message. The Score Breakdown display in VibeFinder at least makes the reasoning visible so a user can see *why* the system made a strange choice — something production recommenders rarely offer.
+The adversarial profile experiment was even more surprising. Giving the system contradictory preferences — "I want high-energy EDM, I feel sad, and I like acoustic music" — did not produce an error. It produced a folk ballad at #2. The algorithm followed its own rules perfectly and still delivered a result that would make no sense to a real listener. That gap between "rule-correct" and "human-sensible" is exactly where most AI recommendation systems fail quietly, without any error message. The Score Breakdown display in MusicMoodMapper at least makes the reasoning visible so a user can see *why* the system made a strange choice — something production recommenders rarely offer.
 
 
 
