@@ -13,3 +13,6 @@ venv/
 
 # Pytest cache
 .pytest_cache/
+
+# AI plan mode working files — kept locally, not for the repo
+ai_plan_mode_files/
